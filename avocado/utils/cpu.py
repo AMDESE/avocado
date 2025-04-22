@@ -629,6 +629,8 @@ def lscpu():
     :cores per socket:
     :physical sockets:
     :physical chips:
+    :threads per core:
+    :sockets:
     :chips: physical sockets * physical chips
     """
     output = process.run("lscpu")
@@ -640,6 +642,10 @@ def lscpu():
             res["physical_sockets"] = int(line.split(":")[1].strip())
         if "Physical chips:" in line:
             res["physical_chips"] = int(line.split(":")[1].strip())
+        if "Thread(s) per core:" in line:
+            res["threads_per_core"] = int(line.split(":")[1].strip())
+        if "Socket(s):" in line:
+            res["sockets"] = int(line.split(":")[1].strip())
     if "physical_sockets" in res and "physical_chips" in res:
         res["chips"] = res["physical_sockets"] * res["physical_chips"]
     return res
