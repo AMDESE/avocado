@@ -21,6 +21,7 @@
 Linux kernel modules APIs
 """
 
+import gzip
 import logging
 import os
 import platform
@@ -223,10 +224,26 @@ def check_kernel_config(config_name):
     :rtype: :class:`ModuleConfig`
     """
 
+    def parse_kernel_config(kernel_config):
+        for line in kernel_config:
+            line = line.split("=")
+
+            if len(line) != 2:
+                continue
+
+            config = line[0].strip()
+            if config == config_name:
+                option = line[1].strip()
+                if option == "m":
+                    return ModuleConfig.MODULE
+                return ModuleConfig.BUILTIN
+        return ModuleConfig.NOT_SET
+
     kernel_version = platform.uname()[2]
 
     # NOTE: If other locations for config files are known, they should be added here
     config_locations = [
+        Path("/proc/config.gz"),
         Path(f"/boot/config-{kernel_version}"),
         Path(f"/usr/lib/modules/{kernel_version}/config"),
     ]
@@ -240,21 +257,12 @@ def check_kernel_config(config_name):
             f"No kernel configuration file found for version {kernel_version}"
         )
 
-    with open(config_file, "r") as kernel_config:  # pylint: disable=W1514
-        for line in kernel_config:
-            line = line.split("=")
-
-            if len(line) != 2:
-                continue
-
-            config = line[0].strip()
-            if config == config_name:
-                option = line[1].strip()
-                if option == "m":
-                    return ModuleConfig.MODULE
-                else:
-                    return ModuleConfig.BUILTIN
-    return ModuleConfig.NOT_SET
+    if config_file.name.endswith(".gz"):
+        with gzip.open(config_file, "rt") as kernel_config:
+            return parse_kernel_config(kernel_config)
+    else:
+        with open(config_file, "r") as kernel_config:  # pylint: disable=W1514
+            return parse_kernel_config(kernel_config)
 
 
 def configure_module(module, config):
