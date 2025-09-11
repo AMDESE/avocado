@@ -406,7 +406,8 @@ def attach_driver(device, driver):
 
     try:
         # add vendor id of device to driver
-        add_vendor_id(device, driver)
+        if driver is not None:
+            add_vendor_id(device, driver)
 
         # unbind the device from its initial driver
         cur_driver = get_driver(device)
