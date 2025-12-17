@@ -334,6 +334,24 @@ def get_x86_amd_zen(family=None, model=None):
                     return _zen
 
 
+def get_cpuid_leaf(cpu_no, leaf, subleaf):
+    try:
+        cmd = f"taskset -c %d cpuid -1 -r -l %s -s %d" % (cpu_no, leaf, subleaf)
+        stream = os.popen(cmd)
+    except process.CmdError as details:
+        details.additional_text = f"Command '{cmd}' failed"
+        details.stderr = details.result.stderr
+        details.stdout = details.result.stdout
+
+    lines = stream.readlines()
+    regsline = lines[1].strip().split(":")[1].strip()
+    eax = int(regsline.split()[0].split("=")[1], 0)
+    ebx = int(regsline.split()[1].split("=")[1], 0)
+    ecx = int(regsline.split()[2].split("=")[1], 0)
+    edx = int(regsline.split()[3].split("=")[1], 0)
+    return (eax, ebx, ecx, edx)
+
+
 def online_list():
     """Reports a list of indexes of the online cpus."""
     cpus = []
