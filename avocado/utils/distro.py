@@ -478,6 +478,19 @@ class UnionTechProbe(Probe):
     CHECK_FILE_DISTRO_NAME = "uos"
     CHECK_VERSION_REGEX = re.compile(r"MinorVersion=(\d+)")
 
+class AnolisProbe(Probe):
+    """
+    Probe for Anolis OS systems
+    """
+
+    CHECK_FILE = "/etc/os-release"
+    CHECK_FILE_CONTAINS = "Anolis OS"
+    CHECK_FILE_DISTRO_NAME = "anolis"
+    CHECK_VERSION_REGEX = re.compile(
+        r'.*VERSION_ID="(\d+)\.?(\d+)?".*',
+        re.MULTILINE | re.DOTALL
+    )
+
 
 #: the complete list of probes that have been registered
 REGISTERED_PROBES = []
@@ -501,6 +514,7 @@ register_probe(SUSEProbe)
 register_probe(UbuntuProbe)
 register_probe(OpenEulerProbe)
 register_probe(UnionTechProbe)
+register_probe(AnolisProbe)
 
 
 def detect(session=None):
