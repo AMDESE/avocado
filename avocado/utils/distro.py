@@ -491,6 +491,18 @@ class AnolisProbe(Probe):
         re.MULTILINE | re.DOTALL
     )
 
+class OpenCloudOSProbe(Probe):
+    """
+    Probe for OpenCloudOS systems
+    """
+
+    CHECK_FILE = "/etc/os-release"
+    CHECK_FILE_CONTAINS = "OpenCloudOS"
+    CHECK_FILE_DISTRO_NAME = "opencloudos"
+    CHECK_VERSION_REGEX = re.compile(
+        r'.*VERSION_ID="(\d+)\.?(\d+)?".*',
+        re.MULTILINE | re.DOTALL
+    )
 
 #: the complete list of probes that have been registered
 REGISTERED_PROBES = []
@@ -515,6 +527,7 @@ register_probe(UbuntuProbe)
 register_probe(OpenEulerProbe)
 register_probe(UnionTechProbe)
 register_probe(AnolisProbe)
+register_probe(OpenCloudOSProbe)
 
 
 def detect(session=None):
